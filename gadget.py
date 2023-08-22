@@ -1,6 +1,6 @@
 import requests
 import tkinter as tk
-from tkinter import PhotoImage
+from tkinter import PhotoImage, Menu
 from PIL import Image, ImageTk
 
 class GadgetApp:
@@ -39,11 +39,22 @@ class GadgetApp:
         # Evento de doble clic para cerrar
         self.root.bind('<Double-1>', self.close_gadget)
 
-        # Cambiar tamaño al mover el mouse
-        self.root.bind('<B1-Motion>', self.resize_gadget)
+        # Cambiar tamaño al mover el mouse (clic izquierdo)
+        self.root.bind('<Button-1>', self.start_action)
+        self.root.bind('<B1-Motion>', self.perform_action)
+        self.root.bind('<ButtonRelease-1>', self.stop_action)
 
-        # Cambiar color de fondo al hacer clic derecho
-        self.root.bind('<Button-3>', self.change_bg_color)
+        # Agregar menú contextual
+        self.root.bind('<Button-3>', self.show_context_menu)
+
+        # Variable para determinar la acción actual
+        self.action = None
+
+        # Variables para guardar la posición y tamaño antes de la acción
+        self.x = 0
+        self.y = 0
+        self.width = 0
+        self.height = 0
 
         # Obtener y mostrar la IP pública
         self.update_ip()
@@ -67,16 +78,41 @@ class GadgetApp:
         if self.click_count >= 2:
             self.root.destroy()
 
-    def resize_gadget(self, event):
-        new_width = event.x_root - self.root.winfo_x()
-        new_height = event.y_root - self.root.winfo_y()
-        self.root.geometry(f'{new_width}x{new_height}')
+    def start_action(self, event):
+        self.x = event.x
+        self.y = event.y
 
-    def change_bg_color(self, event):
-        colors = ['#ffffff', '#f0f0f0', '#e0e0e0']  # Agrega más colores si deseas
-        current_color = self.ip_frame.cget('bg')
-        next_color = colors[(colors.index(current_color) + 1) % len(colors)]
-        self.ip_frame.config(bg=next_color)
+    def perform_action(self, event):
+        if self.action == 'move':
+            deltax = event.x - self.x
+            deltay = event.y - self.y
+            new_x = self.root.winfo_x() + deltax
+            new_y = self.root.winfo_y() + deltay
+            self.root.geometry(f'+{new_x}+{new_y}')
+        elif self.action == 'resize':
+            delta_width = event.x - self.x
+            delta_height = event.y - self.y
+            new_width = self.width + delta_width
+            new_height = self.height + delta_height
+            self.root.geometry(f'{new_width}x{new_height}')
+
+    def stop_action(self, event):
+        self.action = None
+
+    def show_context_menu(self, event):
+        menu = Menu(self.root, tearoff=0)
+        menu.add_command(label="Mover", command=lambda: self.set_action('move'))
+        menu.add_command(label="Redimensionar", command=lambda: self.set_action('resize'))
+        menu.add_separator()
+        menu.add_command(label="Salir", command=self.root.destroy)
+        menu.post(event.x_root, event.y_root)
+
+    def set_action(self, action):
+        self.action = action
+        self.x = self.root.winfo_pointerx()
+        self.y = self.root.winfo_pointery()
+        self.width = self.root.winfo_width()
+        self.height = self.root.winfo_height()
 
 if __name__ == '__main__':
     root = tk.Tk()
