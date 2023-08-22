@@ -1,4 +1,4 @@
-# Gadget RCPIP - Empresa RENACE
+# Gadget RCPIP - RENACE
 
 Bienvenido al proyecto Gadget RCPIP, desarrollado por la Empresa RENACE. Este es un pequeño gadget de escritorio que muestra la dirección IP pública y permite copiarla al portapapeles. Además, ofrece la capacidad de mover y redimensionar el gadget según tus preferencias.
 
